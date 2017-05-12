@@ -21,32 +21,38 @@
 var ip = ""
 var por = ""
 
+
 function set_ip(val)
 {
-    ip=val
-    console.log("Local computer IP="+ ip)
+    ip_alt=val
+    console.log("Local computer IP="+ ip_alt)
 }
 
 function set_port(val)
 {
-    port=val
-    console.log("Socket Port="+ port)
+    port_alt=val
+    console.log("Socket Port="+ port_alt)
 }
+
 
 
 $(document).ready(function(){
 
 	var received = $('#received');
 
+	var parser = document.createElement('a');
+	parser.href = document.URL;
+	ip = parser.hostname;
+	port = parser.port;
+
 	// Define Socket with local computer IP
-	// var socket = new WebSocket("ws://"+ip+":8181/ws");
 	var socket = new WebSocket("ws://"+ip+":"+port+"/ws");
 	console.log("ws://"+ip+":"+port+"/ws")
 
 	 
 	socket.onopen = function(){  
 	  console.log("connected");
-	  push_response('Web Chat Client from JCASOFT')
+	  push_response('Web Chat Client by JCASOFT')
 	}; 
 
 	socket.onmessage = function (message) {

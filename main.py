@@ -46,15 +46,14 @@ import multiprocessing
 import json
 import time
 import os
+from subprocess import check_output
 
-from netifaces import interfaces, ifaddresses, AF_INET
+global ip
+ip = check_output(['hostname', '--all-ip-addresses']).replace(" \n","")
 
 clients = [] 
 
-for ifaceName in interfaces():
-	ip = addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )][0]
 
-print("*****MYCROFT IP : ",ip)
 
 input_queue = multiprocessing.Queue()
 output_queue = multiprocessing.Queue()
@@ -81,7 +80,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 	    if utterance == '"mic_on"':
 		create_signal('startListening')
 	    else:
-	    	lang = 'en-us'
 		data = {"lang": lang, "session": "", "utterances": [utterance]}
 	    	ws.emit(Message('recognizer_loop:utterance', data))
 	        t = Thread(target = self.newThread)
@@ -163,6 +161,13 @@ def main():
     validate_param(host, "websocket.host")
     validate_param(port, "websocket.port")
     validate_param(route, "websocket.route")
+
+
+    url = "http://" + str(ip)+":"+str(port)
+
+    print "*********************************************************"
+    print "*   Access from web browser " + url
+    print "*********************************************************"
 
     routes = [
         (route, WebsocketEventHandler),
