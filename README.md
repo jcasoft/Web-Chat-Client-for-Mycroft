@@ -2,6 +2,7 @@
 ===================
 
 For Mycroft with new API (https://home.mycroft.ai) Version 8.10 or higher
+See on Youtube (https://www.youtube.com/watch?v=J8NGy9UwkPI)
 
 
 
