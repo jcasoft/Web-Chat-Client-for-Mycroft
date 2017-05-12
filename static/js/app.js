@@ -19,24 +19,17 @@
 */
 
 var ip = ""
-var por = ""
-
-function set_ip(val)
-{
-    ip=val
-    console.log("Local computer IP="+ ip)
-}
-
-function set_port(val)
-{
-    port=val
-    console.log("Socket Port="+ port)
-}
-
+var port = ""
 
 $(document).ready(function(){
 
 	var received = $('#received');
+
+	// Calculate host and port from URL
+	var parser = document.createElement('a');
+	parser.href = document.URL;
+	ip = parser.hostname;
+	port = parser.port;
 
 	// Define Socket with local computer IP
 	// var socket = new WebSocket("ws://"+ip+":8181/ws");
