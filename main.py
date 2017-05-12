@@ -51,18 +51,13 @@ from netifaces import interfaces, ifaddresses, AF_INET
 
 clients = [] 
 
-for ifaceName in interfaces():
-	ip = addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )][0]
-
-print("*****MYCROFT IP : ",ip)
-
 input_queue = multiprocessing.Queue()
 output_queue = multiprocessing.Queue()
 
         
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render('index.html',ip=ip,  port=port)
+        self.render('index.html')
 
 class StaticFileHandler(tornado.web.RequestHandler):
 	def get(self):
