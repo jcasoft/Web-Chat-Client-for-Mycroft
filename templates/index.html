@@ -55,13 +55,7 @@
           </div>
 
 	  <ul class="nav nav-pills navbar-right">
-		<!--
-		<li class="active"><a href="#" id="reload"><i class="fa fa-refresh"></i></a></li>
-		-->
 		<li class="active"><a href="#" id="mic_on"><i class="fa fa-microphone"></i></a></li>
-		<!--
-		<li class="active"><a href="#" id="mic_off"><i class="fa fa-microphone-slash"></i></a></li>
-		-->
 		<li class="active"><a href="#" id="mute_volume"><i class="fa fa-volume-off"></i></a></li>
 		<li class="active"><a href="#" id="increase_volume"><i class="fa fa-volume-up"></i></a></li>
 		<li class="active"><a href="#" id="reduce_volume"><i class="fa fa-volume-down"></i></a></li>
@@ -75,12 +69,23 @@
       </nav>
     </div>
 
+
+
     <div class="container">
         <div class="right">
             <div class="chat" data-chat="person2">
             </div>
-            <div style="display: none;" id="writer" class="write">
-                <input id="textbox" type="search" />
+            <div style="display: none;" id="writer" class="write" >
+		<div class="row">
+		    <div class="form-group" >
+			<div class="col-xs-11">
+				<input type="text" name="body" id="textbox" class="form-control"/>
+			</div>
+			<div class="col-xs-1">
+				<button type="submit" id="textbox_submit" class="btn btn-primary pull-right btn-lg RbtnMargin">Send&nbsp;<i class="fa fa-volume-up"></i></button>
+			</div>
+		    </div>
+		</div>
             </div>
         </div>
     </div>

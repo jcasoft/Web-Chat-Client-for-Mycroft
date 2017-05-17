@@ -187,12 +187,20 @@ $(document).ready(function(){
 	});
 
 
+	$('#textbox_submit').click(function(){
+		$(this).blur()
+		$('.chat').append('<div class="bubble me"><i class="fa fa-user-circle" aria-hidden="true"></i>&nbsp;<i class="fa fa-volume-up"></i>&nbsp;' + $('#textbox').val() + '</div>')
+		get_resp($('#textbox').val())
+		document.getElementById('textbox').value = ''
+		return false
+	})
+
 
 	$('#textbox').keypress(function (e) {
 	    if (e.which == 13) {
 		$(this).blur()
 		push_statment($('#textbox').val())
-		get_resp($('#textbox').val())
+		get_resp($('#textbox').val()+"|SILENT")
 		document.getElementById('textbox').value = ''
 		return false
 	    }

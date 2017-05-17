@@ -80,6 +80,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 	    if utterance == '"mic_on"':
 		create_signal('startListening')
 	    else:
+		if "|SILENT" in utterance:
+			utterance = utterance.split("|")
+			utterance = utterance[0]
+			data = {"lang": lang, "session": "", "utterances": [utterance]}
+		else:
+			data = {"lang": lang, "session": "", "utterances": [utterance]}
+
 		data = {"lang": lang, "session": "", "utterances": [utterance]}
 	    	ws.emit(Message('recognizer_loop:utterance', data))
 	        t = Thread(target = self.newThread)
@@ -96,8 +103,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 	time.sleep(1)
-	skill_response = skill_response.replace("Checking for Updates","")
-	skill_response = skill_response.replace("Skills Updated. Mycroft is ready","")
+	#skill_response = skill_response.replace("Checking for Updates","")
+	#skill_response = skill_response.replace("Skills Updated. Mycroft is ready","")
 
 	time.sleep(1)
 	print("*****Response : ",skill_response)
