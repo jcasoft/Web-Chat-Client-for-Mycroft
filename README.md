@@ -35,7 +35,8 @@ Step 1  Download this repo to your download folder
 
 		utterances = message.data.get('utterances', '')
 		#**************************************
-		speak_response = message.data.get('isSpeak', True)			# <-------------- Add this line 
+		speak_response = message.data.get('isSpeak', True)			# <-------------- Add this line
+		client = message.data.get('client', None)				# <-------------- Add this line 
 		#**************************************
 
 		best_intent = None
@@ -49,6 +50,7 @@ Step 1  Download this repo to your download folder
 		        best_intent['utterance'] = utterance
 			#**************************************	
 			best_intent['isSpeak'] = speak_response				# <-------------- Add this line 
+			best_intent['client']  = client					# <-------------- Add this line 
 			#**************************************
 		    except StopIteration, e:
 		        logger.exception(e)
@@ -67,15 +69,16 @@ Step 1  Download this repo to your download folder
 
 		#**************************************
 		def handle_chat_response(event):					# <-------------- Add this line 
-		    global chat_response						# <-------------- Add this line 
+		    global chat_response, client					# <-------------- Add this line 
 		    chat_response = str(event.data)					# <-------------- Add this line 
 		#**************************************
 
 
 		def receive_handler(message):
 		    #**************************************
-		    global isSpeak							# <-------------- Add this line 
+		    global isSpeak, client						# <-------------- Add this line 
 		    isSpeak = message.data["isSpeak"]					# <-------------- Add this line 
+		    client = message.data["client"]					# <-------------- Add this line 
 		    #**************************************
 		    try:
 		        handler(message)
@@ -101,7 +104,8 @@ Step 1  Download this repo to your download folder
 	    def speak(self, utterance, expect_response=False):
 		#**************************************
 		data = {'utterance': utterance,
-		        'expect_response': expect_response, 'isSpeak':isSpeak}		# <-------------- Modify this line 
+		        'expect_response': expect_response, 
+			'isSpeak':isSpeak, , 'client':client}				# <-------------- Modify this line 
 		#**************************************
 		self.emitter.emit(Message("speak", data))
 
@@ -116,7 +120,8 @@ Step 1  Download this repo to your download folder
 		utterance = event.data['utterance']
 		expect_response = event.data.get('expect_response', False)
 		#**************************************
-		isSpeak = event.data.get('isSpeak', True)					# <-------------- Add this line 
+		isSpeak = event.data.get('isSpeak', True)				# <-------------- Add this line 
+		client = event.data.get('client', None)					# <-------------- Add this line 
 		#**************************************
 
 		# This is a bit of a hack for Picroft.  The analog audio on a Pi blocks
@@ -129,9 +134,9 @@ Step 1  Download this repo to your download folder
 		# so we likely will want to get rid of this when not running on Mimic
 
 		#**************************************
-		if isSpeak:									# <-------------- Add this line  and 
+		if isSpeak:								# <-------------- Add this line  and 
 		#**************************************
-		  if not config.get('enclosure', {}).get('platform') == "picroft":		# <-------------- Add two sapces before if not....
+		  if not config.get('enclosure', {}).get('platform') == "picroft":	# <-------------- Add two sapces before if not....
 			start = time.time()
 			chunks = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s',
 				          utterance)
@@ -162,6 +167,16 @@ Setp 3
     if you press <SEND> button receive a Chat and Speak response
 
     If you request something from Mycroft microphone and you have open a Chat session, you will also receive the answer in the Web Chat Client.
+
+
+Note:
+
+New messagebuss data:
+Skills -  DEBUG - {"type": "chat_response", "data": {"lang": "en-us", "session": "", "isSpeak": false, "utterances": ["\"what time is it"], "client": "WebCaht"}, "context": null}
+
+Skills - DEBUG - {"type": "speak", "data": {"expect_response": false, "client": "WebCaht", "utterance": "09:09, AM", "isSpeak": true}, "context": null}
+
+
 
 **Enjoy !**
 --------

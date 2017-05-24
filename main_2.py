@@ -83,11 +83,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 		if "|SILENT" in utterance:
 			utterance = utterance.split("|")
 			utterance = utterance[0]
-			data = {"lang": lang, "session": "", "utterances": [utterance], "isSpeak":False}
+			data = {"lang": lang, "session": "", "utterances": [utterance], "isSpeak":False, "client":"WebCaht"}
 			ws.emit(Message('chat_response', data))
 			ws.emit(Message('recognizer_loop:utterance', data))
 		else:
-			data = {"lang": lang, "session": "", "utterances": [utterance], "isSpeak":True}
+			data = {"lang": lang, "session": "", "utterances": [utterance], "isSpeak":True, "client":"WebCaht"}
 			ws.emit(Message('recognizer_loop:utterance', data))
 
 	        t = Thread(target = self.newThread)
