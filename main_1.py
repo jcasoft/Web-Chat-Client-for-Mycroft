@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 # Copyright 2016 Mycroft AI, Inc.
 #
 # This file is part of Mycroft Core.
@@ -17,21 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Mycroft Core.  If not, see <http://www.gnu.org/licenses/>.
 
-from mycroft.configuration import ConfigurationManager
-from mycroft.messagebus.service.ws import WebsocketEventHandler
-from mycroft.util import validate_param, create_signal
+from mycroft.configuration import Configuration
+from mycroft.messagebus.service.event_handler import MessageBusEventHandler
+from mycroft.util import create_signal
 from mycroft.lock import Lock  # creates/supports PID locking file
-
 
 __author__ = 'seanfitz', 'jdorleans', 'jcasoft'
 
-
 # --------------------------------------
-#__co-author__ = 'jcasoft'		# Only for Web Client 	
-from mycroft.util import kill, play_wav, resolve_resource_file, create_signal
-from mycroft.messagebus.client.ws import WebsocketClient
+# __co-author__ = 'jcasoft'		# Only for Web Client
+from mycroft.util import play_wav, resolve_resource_file, create_signal
+from mycroft.messagebus.client import MessageBusClient
 from mycroft.messagebus.message import Message
 from threading import Thread
+from netifaces import interfaces, ifaddresses, AF_INET
 
 ws = None
 
@@ -49,84 +48,82 @@ import os
 from subprocess import check_output
 
 global ip
-ip = check_output(['hostname', '--all-ip-addresses']).replace(" \n","")
+for ifaceName in interfaces():
+	ip = addresses = [i['addr'] for i in ifaddresses(ifaceName).setdefault(AF_INET, [{'addr':'No IP addr'}] )][0]
 
-clients = [] 
-
-
+clients = []
 
 input_queue = multiprocessing.Queue()
 output_queue = multiprocessing.Queue()
 
-        
+
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render('index.html',ip=ip,  port=port)
+        self.render('index.html', ip=ip, port=port)
+
 
 class StaticFileHandler(tornado.web.RequestHandler):
-	def get(self):
-		self.render('js/app.js')
- 
+    def get(self):
+        self.render('js/app.js')
+
+
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         clients.append(self)
         self.write_message("Welcome to Mycroft")
- 
+
     def on_message(self, message):
-	utterance = json.dumps(message)
-	print("*****Utterance : ",utterance)
+        utterance = json.dumps(message)
+        print("*****Utterance : ", utterance)
 
-	if utterance:
-	    if utterance == '"mic_on"':
-		create_signal('startListening')
-	    else:
-		if "|SILENT" in utterance:
-			utterance = utterance.split("|")
-			utterance = utterance[0]
-			data = {"lang": lang, "session": "", "utterances": [utterance]}
-		else:
-			data = {"lang": lang, "session": "", "utterances": [utterance]}
+        if utterance:
+            if utterance == '"mic_on"':
+                create_signal('startListening')
+            else:
+                if "|SILENT" in utterance:
+                    utterance = utterance.split("|")
+                    utterance = utterance[0]
+                    data = {"lang": lang, "session": "", "utterances": [utterance]}
+                else:
+                    data = {"lang": lang, "session": "", "utterances": [utterance]}
 
-		data = {"lang": lang, "session": "", "utterances": [utterance]}
-	    	ws.emit(Message('recognizer_loop:utterance', data))
-	        t = Thread(target = self.newThread)
-	        t.start()
+            data = {"lang": lang, "session": "", "utterances": [utterance]}
+            ws.emit(Message('recognizer_loop:utterance', data))
+            t = Thread(target=self.newThread)
+            t.start()
 
     def newThread(self):
-	global wait_response
-	global skill_response
+        global wait_response
+        global skill_response
         timeout = 0
         while wait_response:
-	    wait_response = True
+            wait_response = True
             time.sleep(1)
-	    timeout = timeout + 1
+            timeout = timeout + 1
 
+        time.sleep(1)
+        # skill_response = skill_response.replace("Checking for Updates","")
+        # skill_response = skill_response.replace("Skills Updated. Mycroft is ready","")
 
-	time.sleep(1)
-	#skill_response = skill_response.replace("Checking for Updates","")
-	#skill_response = skill_response.replace("Skills Updated. Mycroft is ready","")
+        time.sleep(1)
+        print("*****Response : ", skill_response)
 
-	time.sleep(1)
-	print("*****Response : ",skill_response)
+        self.write_message(skill_response)
 
-	self.write_message(skill_response)
-
-	skill_response = ""
-	wait_response = True
+        skill_response = ""
+        wait_response = True
 
         timeout = 0
         while timeout < 10 or wait_response:
             time.sleep(1)
-	    timeout = timeout + 1
-	     
+        timeout = timeout + 1
 
-	if len(skill_response) > 0:
-		self.write_message(skill_response)
+        if len(skill_response) > 0:
+            self.write_message(skill_response)
 
-	wait_response = True
-	skill_response = ""
+        wait_response = True
+        skill_response = ""
 
- 
     def on_close(self):
         clients.remove(self)
 
@@ -149,7 +146,7 @@ def main():
     skill_response = ""
 
     global ws
-    ws = WebsocketClient()
+    ws = MessageBusClient()
     event_thread = Thread(target=connect)
     event_thread.setDaemon(True)
     event_thread.start()
@@ -159,28 +156,24 @@ def main():
     import tornado.options
 
     tornado.options.parse_command_line()
-    config = ConfigurationManager.get().get("websocket")
-    lang = ConfigurationManager.get().get("lang")
+    config = Configuration.get().get("websocket")
+    lang = Configuration.get().get("lang")
 
     host = config.get("host")
     port = config.get("port")
     route = config.get("route")
-    validate_param(host, "websocket.host")
-    validate_param(port, "websocket.port")
-    validate_param(route, "websocket.route")
 
+    url = "http://" + str(ip) + ":" + str(port)
 
-    url = "http://" + str(ip)+":"+str(port)
-
-    print "*********************************************************"
-    print "*   Access from web browser " + url
-    print "*********************************************************"
+    print("*********************************************************")
+    print("*   Access from web browser " + url)
+    print("*********************************************************")
 
     routes = [
-        (route, WebsocketEventHandler),
-	tornado.web.url(r"/", MainHandler, name="main"),
-	tornado.web.url(r"/static/(.*)", tornado.web.StaticFileHandler, {'path':  './'}),
-	tornado.web.url(r"/ws", WebSocketHandler)
+        (route, MessageBusEventHandler),
+        tornado.web.url(r"/", MainHandler, name="main"),
+        tornado.web.url(r"/static/(.*)", tornado.web.StaticFileHandler, {'path': './'}),
+        tornado.web.url(r"/ws", WebSocketHandler)
     ]
 
     settings = {
@@ -188,7 +181,6 @@ def main():
         "template_path": os.path.join(os.path.dirname(__file__), "templates"),
         "static_path": os.path.join(os.path.dirname(__file__), "static"),
     }
-    
 
     application = tornado.web.Application(routes, **settings)
     httpServer = tornado.httpserver.HTTPServer(application)
@@ -199,4 +191,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
