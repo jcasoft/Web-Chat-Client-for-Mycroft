@@ -1,0 +1,93 @@
+<!--
+-------------------------------------------------------------
+	Author:	jcasoft	- Juan Carlos Argueta
+	Web Chat Client for Mycroft
+
+	to do:
+		reload or refresh
+		mic_on
+		mic_off
+		mute
+		vol_up
+		vol_down
+		backward
+		forward
+		play
+		pause
+
+-------------------------------------------------------------
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mycroft Web Chat Client</title>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="cleartype" content="on">
+
+    <link rel="stylesheet" href="./static/css/bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="./static/css/todc-bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="./static/css/app.css">
+    <link rel="stylesheet" href="./static/css/font-awesome.css">
+
+
+    <script type="text/javascript">
+        function detectmob() {
+            if (typeof window.orientation !== 'undefined') {
+                return true;
+            }
+            return false;
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="mycroft">
+      <nav class="navbar navbar-masthead navbar-inverse navbar-fixed-top">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#"><img src="./static/img/Duke-Sticker1.png" alt="Duke!" style="width:120px;height:120px;">
+            </a>
+          </div>
+
+      </nav>
+    </div>
+
+
+
+    <div class="container">
+          <div class="right">
+              <div class="chat" data-chat="person2">
+              </div>
+              <div style="display: none;" id="writer" class="write" >
+  		<div class="row">
+  		    <div class="form-group" >
+  			<div class="col-xs-11">
+  				<input type="text" name="body" id="textbox" class="form-control"><button type="submit" id="textbox_submit" class="btn btn-primary pull-right btn-lg RbtnMargin">Envoyer</button>
+  			</div>
+  			<div class="col-xs-1">
+  				<button id="mic_on" class="btn btn-primary pull-right btn-lg RbtnMargin">Microphone</button>
+  			</div>
+  		    </div>
+  		</div>
+              </div>
+          </div>
+      </div>
+
+  				<button type="submit" id="textbox_submit" class="btn btn-primary pull-right btn-lg RbtnMargin">Send&nbsp;<i class="fa fa-volume-up"></i></button>
+<i class="fa fa-volume-up">
+<button class="fa fa-microphone"></button>
+
+    <script src="./static/js/jquery-3.2.1.min.js"></script>
+    <script src="./static/js/app.js"></script>
+    <script type="text/javascript">
+        document.getElementById('writer').style.display = 'block';
+    </script>
+
+</body>
+
+</html>
