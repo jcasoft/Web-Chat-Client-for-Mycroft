@@ -49,7 +49,6 @@ $(document).ready(function(){
 	};
 
 	var sendMessage = function(message) {
-	  console.log("sending:" + message.data);
     var jsonMessage = "{\"data\": {\"utterances\": [\""+message.data+"\"] }, \"type\": \"recognizer_loop:utterance\", \"context\": {\"userid\" : \"demo.ekylibre.io\"}}"
 	  socket.send(jsonMessage);
 	};
@@ -65,11 +64,23 @@ $(document).ready(function(){
         	  push_response(incomingjson.data.utterance)
           }
           if (incomingjson.type == "NLP_correction") {
-              console.log("NLP à corriger")
+						  var to_modify = incomingjson.data.utterance
+							$(".chat > div").each(function() {
+								console.log($(this))
+								console.log("on compare :-"+$(this).text()+"- et -"+to_modify+"-")
+								if ($(this).text() === to_modify) {
+									for (var key in incomingjson.data){
+							        if (key !== "utterance") {
+													$(this).html($(this).html().replace(key,"<g><span>"+incomingjson.data[key]+"</span></g>"))
+													console.log($(this).html())
+											}
+							    }
+
+								}
+    });
               // To do : Function to correct utterances & highlight text
           }
       }
-  // The function returns the product of p1 and p2
 }
 
 
@@ -91,12 +102,12 @@ $(document).ready(function(){
 
 
 	function push_statment(msg) {
-	    $('.chat').append('<div class="bubble me"><i class="fa fa-user-circle" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
+	    $('.chat').append('<div class="bubble me"><i class="fa fa-user-circle" aria-hidden="true"></i>' + msg + '</div>')
 	}
 
 
 	function push_response(msg, callback) {
-		$('.chat').append('<div class="bubble you">&nbsp;&nbsp;' + msg + '</div>')
+		$('.chat').append('<div class="bubble you">' + msg + '</div>')
 	}
 
 	function get_resp(q, is_response = false) {
@@ -112,7 +123,7 @@ $(document).ready(function(){
 
 	$('#textbox_submit').click(function(){
 		$(this).blur()
-		$('.chat').append('<div class="bubble me">&nbsp;' + $('#textbox').val() + '</div>')
+		$('.chat').append('<div class="bubble me">'+$('#textbox').val()+'</div>')
 		get_resp($('#textbox').val())
 		document.getElementById('textbox').value = ''
 		return false
