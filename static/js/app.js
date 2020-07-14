@@ -20,19 +20,7 @@
 
 var ip = ""
 var por = ""
-
-
-function set_ip(val)
-{
-    ip_alt=val
-    console.log("Local computer IP="+ ip_alt)
-}
-
-function set_port(val)
-{
-    port_alt=val
-    console.log("Socket Port="+ port_alt)
-}
+var user_id = "demo.ekylibre.io"
 
 
 
@@ -46,30 +34,54 @@ $(document).ready(function(){
 	port = parser.port;
 
 	// Define Socket with local computer IP
-	var socket = new WebSocket("ws://"+ip+":"+port+"/ws");
-	console.log("ws://"+ip+":"+port+"/ws")
+	var socket = new WebSocket("ws://192.168.1.128:8181/core");
 
-	 
-	socket.onopen = function(){  
+	socket.onopen = function(){
 	  console.log("connected");
-	  push_response('Web Chat Client by JCASOFT')
-	}; 
+	};
 
 	socket.onmessage = function (message) {
-	  console.log("receiving: " + message.data);
-	  received.append(message.data);
-	  push_response(message.data)
-
+  parseIncomingMessage(message.data)
 	};
 
 	socket.onclose = function(){
-	  console.log("disconnected"); 
+	  console.log("disconnected");
 	};
 
 	var sendMessage = function(message) {
-	  console.log("sending:" + message.data);
-	  socket.send(message.data);
+    var jsonMessage = "{\"data\": {\"utterances\": [\""+message.data+"\"] }, \"type\": \"recognizer_loop:utterance\", \"context\": {\"userid\" : \"demo.ekylibre.io\"}}"
+	  socket.send(jsonMessage);
 	};
+
+  var parseIncomingMessage = function(inputString) {
+      const incomingjson = JSON.parse(inputString);
+      if (incomingjson.context.userid == user_id) {
+          if (incomingjson.data.expect_response == true){
+            var response = true
+          }
+          if (incomingjson.type == "speak") {
+            received.append(incomingjson.data.utterance);
+        	  push_response(incomingjson.data.utterance)
+          }
+          if (incomingjson.type == "NLP_correction") {
+						  var to_modify = incomingjson.data.utterance
+							$(".chat > div").each(function() {
+								console.log($(this))
+								console.log("on compare :-"+$(this).text()+"- et -"+to_modify+"-")
+								if ($(this).text() === to_modify) {
+									for (var key in incomingjson.data){
+							        if (key !== "utterance") {
+													$(this).html($(this).html().replace(key,"<g><span>"+incomingjson.data[key]+"</span></g>"))
+													console.log($(this).html())
+											}
+							    }
+
+								}
+    });
+              // To do : Function to correct utterances & highlight text
+          }
+      }
+}
 
 
 
@@ -90,106 +102,28 @@ $(document).ready(function(){
 
 
 	function push_statment(msg) {
-	    $('.chat').append('<div class="bubble me"><i class="fa fa-user-circle" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')  
+	    $('.chat').append('<div class="bubble me"><i class="fa fa-user-circle" aria-hidden="true"></i>' + msg + '</div>')
 	}
 
 
 	function push_response(msg, callback) {
-	    if (msg == 'stop') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-window-close" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'reload') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'play') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-play" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'pause') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-pause" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'mute') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-volume-off" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'vol_up') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-volume-up" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'vol_down') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-volume-down" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'mic_on') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-microphone" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'mic_off') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-microphone-slash" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'forward') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-forward" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'backward') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-backward" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else if (msg == 'Web Chat Client from JCASOFT') {
-		$('.chat').append('<div class="bubble you loading"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    } else {
-		$('.chat').append('<div class="bubble you"><i class="fa fa-commenting" aria-hidden="true"></i>&nbsp;&nbsp;' + msg + '</div>')
-	    }
+		$('.chat').append('<div class="bubble you">' + msg + '</div>')
 	}
 
 	function get_resp(q, is_response = false) {
 	    let query = q
-	    console.log("*****Utterance to send to main.py server="+query)	// Send to tornado and wait for response
 	    sendMessage({ 'data' : query});
 
 	}
 
-	$('#stop').click(function(){
-	   sendMessage({ 'data' : 'stop'});
-	   push_response('stop')
-	});
-
-	$('#pause').click(function(){
-	   sendMessage({ 'data' : 'pause'});
-	   push_response('pause')
-	});
-
-	$('#play').click(function(){
-	   sendMessage({ 'data' : 'play'});
-	   push_response('play')
-	});
-
-	$('#next_track').click(function(){
-	   sendMessage({ 'data' : 'next track'});
-	   push_response('next track')
-	});
-
-	$('#previous_track').click(function(){
-	   sendMessage({ 'data' : 'previous track'});
-	   push_response('previous track')
-	});
-
-	$('#reduce_volume').click(function(){
-	   sendMessage({ 'data' : 'reduce volume'});
-	   push_response('reduce volume')
-	});
-
-	$('#increase_volume').click(function(){
-	   sendMessage({ 'data' : 'increase volume'});
-	   push_response('increase volume')
-	});
-
-	$('#mute_volume').click(function(){
-	   sendMessage({ 'data' : 'mute volume'});
-	   push_response('mute volume')
-	});
-
 	$('#mic_on').click(function(){
-	   sendMessage({ 'data' : 'mic_on'});
-	   push_response('start listening on Mycroft mic')
-	});
-
-	$('#mic_off').click(function(){
-	   sendMessage({ 'data' : 'mic_off'});
-	   push_response('mic off')
-	});
-
-	$('#reload').click(function(){
-	   sendMessage({ 'data' : 'reload'});
-	   push_response('reload')
+    console.log("on fait appel au stt")
 	});
 
 
 	$('#textbox_submit').click(function(){
 		$(this).blur()
-		$('.chat').append('<div class="bubble me"><i class="fa fa-user-circle" aria-hidden="true"></i>&nbsp;<i class="fa fa-volume-up"></i>&nbsp;' + $('#textbox').val() + '</div>')
+		$('.chat').append('<div class="bubble me">'+$('#textbox').val()+'</div>')
 		get_resp($('#textbox').val())
 		document.getElementById('textbox').value = ''
 		return false

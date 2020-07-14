@@ -29,11 +29,6 @@ video {
     z-index: 1000;
 }
 
-.navbar-brand>img {
-  height: 70%;
-  transform: translate(10%, 30%);
-}
-
 
 .mycroft .navbar-brand {
   height: 80px;
@@ -50,13 +45,13 @@ video {
 
 .nav > li > a {
     display: block;
-    padding: -50px -150px; 
+    padding: -50px -150px;
     position: relative;
 }
 
 
 .loader {
-    border: 5px solid #f3f3f3;    
+    border: 5px solid #f3f3f3;
     border-top: 5px solid #2980B9;
     border-radius: 50%;
     width: 50px;
@@ -112,6 +107,12 @@ h2 {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
+
+g span {
+  white-space: nowrap;
+    background: #BEF7BD ;
+}
+
 body {
     background-color: #f8f8f8;
     -webkit-font-smoothing: antialiased;
@@ -119,9 +120,6 @@ body {
     text-rendering: optimizeLegibility;
     font-family: 'Source Sans Pro', sans-serif;
     font-weight: 400;
-    background-image: url("https://s17.postimg.org/fr01hfe33/image.jpg");
-    background-size: cover;
-    background-repeat: none;
 }
 #skitt-ui {
     left: 50% !important;
@@ -335,7 +333,7 @@ body {
     vertical-align: middle;
     /*  -moz-border-radius: 35px;
   -webkit-border-radius: 35px;*/
-    
+
     border-radius: 35px;
 }
 @media only screen and (max-width: 767px) {
@@ -368,7 +366,7 @@ body {
 .container .right .bubble.you {
     float: left;
     color: white;
-    background-color: #2980B9;
+    background-color: #98E597;
     -webkit-align-self: flex-start;
     align-self: flex-start;
     -moz-animation-name: slideFromLeft;
